@@ -1,0 +1,26 @@
+{
+  "name": "@linainfratech/ob-core",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Lina-Infratech/ob-core.git"
+  },
+  "keywords": [
+    "openbanking",
+    "openbanking utils",
+    "openbanking security"
+  ],
+  "author": "fabio guelfi",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Lina-Infratech/ob-core/issues"
+  },
+  "homepage": "https://github.com/Lina-Infratech/ob-core#readme",
+  "dependencies": {},
+  "devDependencies": {}
+}

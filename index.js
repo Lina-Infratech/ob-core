@@ -1,4 +1,5 @@
-const Errors = require("./services/errors");
-const { Crypto } = require("./services/crypto");
+const Errors = require("./packages/errors");
+const { Crypto } = require("./packages/crypto");
+const { Regex } = require("./packages/regex");
 
-module.exports = { Crypto, Errors };
+module.exports = { Errors, Crypto, Regex };

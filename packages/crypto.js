@@ -1,15 +1,76 @@
-class Crypto {
-  constructor() {
+const jose = require("node-jose");
+const jwt = require("jsonwebtoken");
+import logger from "../../config/logger";
+import auth from "../../config/auth";
 
+class Crypto {
+  constructor() {}
+
+  async decryptJwe(jwe) {
+    // get key
+    const key = await jose.JWK.asKey(auth.key, "pem").then((result) => result);
+
+    // decode jwe header
+    const jsonKey = key.toJSON(true);
+    jsonKey.alg = auth.encryptionAlg;
+    jsonKey.use = "enc";
+    // decrypt
+    const payload = await jose.JWE.createDecrypt(key)
+      .decrypt(jwe)
+      .then((result) => {
+        return result;
+      });
+
+    const jws = jwt.decode(payload.plaintext.toString().replace(/["]+/g, ""), {
+      complete: true,
+    });
+
+    return jws;
+  }
+  async fetchClientJwk(jwks_uri, kid) {
+    const client = jwksClient({ jwksUri: jwks_uri });
+    const clientKey = await client.getSigningKey(kid);
+    const pemKey = clientKey.getPublicKey();
+    try {
+      const jwk = await jose.JWK.asKey(pemKey, "pem");
+      return jwk.toJSON();
+    } catch (e) {
+      logger.error(e);
+      return null;
+    }
   }
 
-  example = async (value) => {
+  async extractJwkFromCertificate(
+    cert,
+    certFormat = "x509",
+    publicKeyOnly = true
+  ) {
     try {
-      return value;
-    } catch (err) {
-      return err;
+      const jwk = await jose.JWK.asKey(cert, certFormat);
+      return jwk.toJSON(!publicKeyOnly);
+    } catch (e) {
+      logger.error(e);
+      return null;
     }
-  };
+  }
+
+  async createJws(payload) {
+    const key = await jose.JWK.asKey(auth.key, "pem").then((result) => result);
+
+    const token = await jose.JWS.createSign(
+      { format: "compact" },
+      {
+        key,
+        header: {
+          alg: auth.signingAlg,
+        },
+      }
+    )
+      .update(JSON.stringify(payload), "utf-8")
+      .final()
+      .then((result) => result);
+    return token;
+  }
 }
 
 module.exports = Crypto;

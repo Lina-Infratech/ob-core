@@ -21,5 +21,9 @@
   },
   "homepage": "https://github.com/Lina-Infratech/ob-core#readme",
   "devDependencies": {},
-  "description": ""
+  "description": "",
+  "dependencies": {
+    "jsonwebtoken": "^8.5.1",
+    "node-jose": "^2.0.0"
+  }
 }

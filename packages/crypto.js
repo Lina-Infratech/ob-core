@@ -26,7 +26,7 @@ class Crypto {
 
     return jws;
   }
-  async fetchClientJwk(jwks_uri, kid, auth) {
+  async fetchClientJwk(jwks_uri, kid) {
     const client = jwksClient({ jwksUri: jwks_uri });
     const clientKey = await client.getSigningKey(kid);
     const pemKey = clientKey.getPublicKey();

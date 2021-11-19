@@ -24,6 +24,7 @@
   "description": "",
   "dependencies": {
     "jsonwebtoken": "^8.5.1",
-    "node-jose": "^2.0.0"
+    "node-jose": "^2.0.0",
+    "winston": "^3.3.3"
   }
 }

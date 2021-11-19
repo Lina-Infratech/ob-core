@@ -1,12 +1,11 @@
 const jose = require("node-jose");
 const jwt = require("jsonwebtoken");
-import logger from "../../config/logger";
-import auth from "../../config/auth";
+const logger = require("./logger.js");
 
 class Crypto {
   constructor() {}
 
-  async decryptJwe(jwe) {
+  async decryptJwe(jwe, auth) {
     // get key
     const key = await jose.JWK.asKey(auth.key, "pem").then((result) => result);
 
@@ -27,7 +26,7 @@ class Crypto {
 
     return jws;
   }
-  async fetchClientJwk(jwks_uri, kid) {
+  async fetchClientJwk(jwks_uri, kid, auth) {
     const client = jwksClient({ jwksUri: jwks_uri });
     const clientKey = await client.getSigningKey(kid);
     const pemKey = clientKey.getPublicKey();
@@ -54,7 +53,7 @@ class Crypto {
     }
   }
 
-  async createJws(payload) {
+  async createJws(payload, auth) {
     const key = await jose.JWK.asKey(auth.key, "pem").then((result) => result);
 
     const token = await jose.JWS.createSign(

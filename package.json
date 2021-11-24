@@ -1,6 +1,6 @@
 {
   "name": "@linainfratech/ob-core",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -23,6 +23,7 @@
   "devDependencies": {},
   "description": "",
   "dependencies": {
+    "axios": "^0.24.0",
     "jsonwebtoken": "^8.5.1",
     "node-jose": "^2.0.0",
     "winston": "^3.3.3"

@@ -1,5 +1,6 @@
 const jose = require("node-jose");
 const jwt = require("jsonwebtoken");
+const axios = require("axios");
 const logger = require("./logger.js");
 
 class Crypto {
@@ -69,6 +70,58 @@ class Crypto {
       .final()
       .then((result) => result);
     return token;
+  }
+
+  async decryptJweWithCoreKey(jwe) {
+    logger.info("Decrypting jwe");
+    const options = {
+      method: "POST",
+      data: { jwe },
+      url: `https://orchestrator.dev.linaob.com.br/decrypt`,
+      httpsAgent: new https.Agent({ rejectUnauthorized: false }),
+    };
+
+    try {
+      logger.info("sending orchestrator request");
+      const {
+        data: { jws },
+      } = await axios(options);
+      logger.info("decrypted");
+      return jws;
+    } catch (e) {
+      logger.error("Axios options:", options);
+      logger.error(e);
+      return null;
+    }
+  }
+
+  async encryptJwsWithCoreKey(jws) {
+    const jwks = await auth.fetchCorePublicKey();
+    const key = await jose.JWK.asKey(jwks, "json").then((result) => result);
+
+    const token = await jose.JWE.createEncrypt({ format: "compact" }, key)
+      .update(JSON.stringify(jws), "utf-8")
+      .final()
+      .then((result) => result);
+
+    return token;
+  }
+
+  async fetchClientJwks(jwks_uri) {
+    const jwksOptions = {
+      method: "GET",
+      url: jwks_uri,
+    };
+
+    try {
+      const {
+        data: { keys },
+      } = await axios(jwksOptions);
+      return keys;
+    } catch (e) {
+      logger.error(e);
+      return null;
+    }
   }
 }
 

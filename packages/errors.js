@@ -1,3 +1,3 @@
-export default {
-  UNHANDLE_ERROR: 'UNHANDLE_ERROR',
+module.exports = {
+  UNHANDLE_ERROR: "UNHANDLE_ERROR",
 };

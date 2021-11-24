@@ -1,6 +1,7 @@
 const jose = require("node-jose");
 const jwt = require("jsonwebtoken");
 const axios = require("axios");
+const jwksClient = require("jwks-rsa");
 const logger = require("./logger.js");
 
 class Crypto {
@@ -72,42 +73,24 @@ class Crypto {
     return token;
   }
 
-  async decryptJweWithCoreKey(jwe) {
-    logger.info("Decrypting jwe");
-    const options = {
-      method: "POST",
-      data: { jwe },
-      url: `https://orchestrator.dev.linaob.com.br/decrypt`,
-      httpsAgent: new https.Agent({ rejectUnauthorized: false }),
-    };
-
+  async fetchClientJwkWithKid(jwks_uri, kid) {
+    const client = jwksClient({ jwksUri: jwks_uri });
+    const clientKey = await client.getSigningKey(kid);
+    const pemKey = clientKey.getPublicKey();
     try {
-      logger.info("sending orchestrator request");
-      const {
-        data: { jws },
-      } = await axios(options);
-      logger.info("decrypted");
-      return jws;
+      const jwk = await jose.JWK.asKey(pemKey, "pem");
+      return jwk.toJSON();
     } catch (e) {
-      logger.error("Axios options:", options);
       logger.error(e);
       return null;
     }
   }
 
-  async encryptJwsWithCoreKey(jws) {
-    const jwks = await auth.fetchCorePublicKey();
-    const key = await jose.JWK.asKey(jwks, "json").then((result) => result);
+  async fetchClientJwks(jwks_uri, use = null, kid = null) {
+    if (kid) {
+      return fetchClientJwkWithKid(jwks_uri, kid);
+    }
 
-    const token = await jose.JWE.createEncrypt({ format: "compact" }, key)
-      .update(JSON.stringify(jws), "utf-8")
-      .final()
-      .then((result) => result);
-
-    return token;
-  }
-
-  async fetchClientJwks(jwks_uri) {
     const jwksOptions = {
       method: "GET",
       url: jwks_uri,
@@ -117,11 +100,103 @@ class Crypto {
       const {
         data: { keys },
       } = await axios(jwksOptions);
+      /*
+      const jwks = keys.filter(remoteKey => {
+        return remoteKey.use === use;
+      });
+      return jwks[0];
+      */
       return keys;
     } catch (e) {
       logger.error(e);
       return null;
     }
+  }
+
+  async extractJwkFromCertificate(
+    cert,
+    certFormat = "x509",
+    publicKeyOnly = true
+  ) {
+    try {
+      const jwk = await jose.JWK.asKey(cert, certFormat);
+      return jwk.toJSON(!publicKeyOnly);
+    } catch (e) {
+      logger.error(e);
+      return null;
+    }
+  }
+
+  async fetchPublicKid(key) {
+    const jwksUri = `https://keystore.sandbox.directory.openbankingbrasil.org.br/${process.env.ORG_ID}/application.jwks`;
+    const jwksOptions = {
+      method: "GET",
+      url: jwksUri,
+    };
+    try {
+      const {
+        data: { keys },
+      } = await axios(jwksOptions);
+      const publicKey = keys.filter((remoteKey) => {
+        return remoteKey.n && remoteKey.n === key.n;
+      });
+      return publicKey[0].kid;
+    } catch (e) {
+      logger.error(e);
+      return null;
+    }
+  }
+
+  async generateJws(payload, useDirectoryKid, auth) {
+    const key = await jose.JWK.asKey(auth.key, "pem").then((result) => result);
+
+    const options = {
+      key,
+      header: {
+        alg: auth.signingAlg,
+        typ: "JWT",
+      },
+    };
+    if (useDirectoryKid) {
+      options.header.kid = await fetchPublicKid(key.toJSON(true));
+    }
+
+    const token = await jose.JWS.createSign({ format: "compact" }, options)
+      .update(JSON.stringify(payload), "utf-8")
+      .final()
+      .then((result) => result);
+    return token;
+  }
+
+  async createJwe(jws, jwkJson = null, auth) {
+    let key;
+    let publicKid;
+    if (!jwkJson) {
+      key = await jose.JWK.asKey(auth.key, "pem").then((result) => result);
+      publicKid = await this.fetchPublicKid(key.toJSON(true));
+    } else {
+      key = await jose.JWK.asKey(JSON.stringify(jwkJson), "json").then(
+        (result) => result
+      );
+      publicKid = key.kid;
+    }
+
+    const token = await jose.JWE.createEncrypt(
+      { format: "compact" },
+      {
+        key,
+        header: {
+          kid: publicKid,
+          enc: auth.encryptionAlg,
+          iv: "1234567890",
+        },
+      }
+    )
+      .update(JSON.stringify(jws), "utf-8")
+      .final()
+      .then((result) => result);
+
+    return token;
   }
 }
 

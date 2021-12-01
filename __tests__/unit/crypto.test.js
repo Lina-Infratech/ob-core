@@ -13,7 +13,7 @@ describe("Crypto", () => {
     expect(authDto.key).toBe('golang')
   })
 
-  xit("should decrypt with decryptJwe", async () => {
+  it("should decrypt with decryptJwe", async () => {
     const crypto = new Crypto()
 
     console.log(`Crypto`, crypto)

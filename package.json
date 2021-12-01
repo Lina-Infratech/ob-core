@@ -3,7 +3,8 @@
   "version": "1.0.5",
   "main": "index.js",
   "scripts": {
-    "test": "NODE_ENV=test jest"
+    "test": "NODE_ENV=test jest",
+    "test:coverage": "npm run test --coverage"
   },
   "repository": {
     "type": "git",

@@ -3,7 +3,7 @@ const httpStatus = require('http-status');
 const errors = require('../errors');
 const ConfigPostgres = require('../factory/configPostgres');
 const { Database } = require(process.cwd() + '/src/database/index');
-const { cache } = require('../cache/tenantsCache')
+const { cache } = require('../cache/tenantsCache');
 
 module.exports = async (req, res, next) => {
   try {

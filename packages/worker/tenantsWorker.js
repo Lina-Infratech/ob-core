@@ -20,6 +20,7 @@ class TenantWorker {
             const postgres = data
                 .map((client) => client)
                 .map((value) => value.postgres.find((value) => value.microservice === process.env.MS))
+                .filter((element) => element !== undefined);
 
             for await (const { hostname, username, password, port, db_name } of postgres) {
                 const current = new ConfigPostgres(hostname, username, password, port, db_name)

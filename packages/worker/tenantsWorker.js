@@ -33,7 +33,7 @@ class TenantWorker {
 
                 await new Promise((resolve, reject) => {
                     const migrate = exec(
-                        `sequelize db:migrate --env current`,
+                        `npx sequelize db:migrate --env current`,
                         { env: process.env },
                         err => (err ? reject(err) : resolve())
                     );

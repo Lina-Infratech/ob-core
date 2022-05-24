@@ -1,5 +1,3 @@
-const Crypto = require("./packages/crypto");
-const Regex = require("./packages/regex");
-const Logger = require("./packages/logger");
+const Crypto = require("./packages/crypto")
 
-module.exports = { Crypto, Regex, Logger };
+module.exports = { Crypto }

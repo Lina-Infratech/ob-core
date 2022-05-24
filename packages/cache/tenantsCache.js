@@ -1,9 +1,9 @@
-const NodeCache = require("node-cache");
+const NodeCache = require("node-cache")
 
 class TenantCache {
     constructor() {
-        this.cache = new NodeCache();
+        this.cache = new NodeCache()
     }
 }
 
-module.exports = new TenantCache();
+module.exports = new TenantCache()

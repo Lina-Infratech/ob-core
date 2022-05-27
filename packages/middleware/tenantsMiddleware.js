@@ -4,6 +4,7 @@ const errors = require('../utils/enums/errorsEnum')
 const ConfigPostgresFactory = require('../factory/configPostgresFactory')
 const { Database } = require(process.cwd() + '/src/database/index')
 const { cache } = require('../cache/tenantsCache')
+const Axios = require('../http/client/axios')
 
 module.exports = async (req, res, next) => {
   try {
@@ -48,6 +49,7 @@ module.exports = async (req, res, next) => {
 
     req.models = models
     req.tenant = cache.get(key)
+    req.axios =  new Axios({ tenant_id });
 
     return next()
   } catch (error) {

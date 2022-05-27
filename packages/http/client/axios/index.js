@@ -5,22 +5,26 @@ const tenant = require('./tenant')
 
 class Axios {
     options = {
-        timeout: 5000
+        timeout: 5000,
     }
 
     constructor(options) {
         this.options = options
-        this.bootstrap()
+        this.bootstrap(options)
     }
 
-    bootstrap() {
-        const { timeout } = this.options
+    bootstrap(options) {
+        this.instance = axios.create(this.options)
 
-        this.instance = axios.create({ timeout })
-
+        // tenant header context
         tenant(this.instance)
-        curl(this.instance)
 
+        // curl
+        if (process.env.NODE_ENV !== 'production') {
+            curl(this.instance)
+        }
+
+        // rax retry
         this.instance.defaults.raxConfig = {
             instance: this.instance
         }

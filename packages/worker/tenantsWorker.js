@@ -45,6 +45,17 @@ class TenantWorker {
                             migrate.stderr.pipe(process.stderr)
                         })
 
+                        await new Promise((resolve, reject) => {
+                            const migrate = exec(
+                                `sequelize db:seed:all --env current`,
+                                { env: process.env },
+                                err => (err ? reject(err) : resolve())
+                            )
+
+                            migrate.stdout.pipe(process.stdout)
+                            migrate.stderr.pipe(process.stderr)
+                        })
+
                         await fsPromisse.unlink(path)
                     }
                 }

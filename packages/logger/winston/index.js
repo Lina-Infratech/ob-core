@@ -1,21 +1,17 @@
-const moment = require('moment')
-const { createLogger, format, transports, config, } = require('winston')
-const { combine, timestamp, label, printf } = format
-const errors = require('../../utils/enums/errorsEnum')
+const moment = require("moment");
+const { createLogger, format, transports } = require("winston");
+const { combine, timestamp, label, printf } = format;
+const errors = require("../../utils/enums/errorsEnum");
 
-const myFormat = printf(info => {
-  return `[${moment(info.timestamp).format('DD/MM/YYYY HH:mm:ss.SSS')}] [${info.level}] [${info.label}]: ${info.message}`
-})
+const myFormat = printf((info) => {
+  return `[${moment(info.timestamp).format("DD/MM/YYYY HH:mm:ss.SSS")}] [${
+    info.level
+  }] [${info.label}]: ${info.message}`;
+});
 
-if (process.env.DD_HOST == null && process.env.DD_KEY == null && process.env.DD_SOURCE == null && process.env.NODE_ENV  && process.env.MS == null) {
-  throw new Error(errors.ERROR_ENVIROMENT_VARIABLES_MISSING)
+if (process.env.NODE_ENV && process.env.MS == null) {
+  throw new Error(errors.ERROR_ENVIROMENT_VARIABLES_MISSING);
 }
-
-const httpTransportOptions = {
-  host: process.env.DD_HOST,
-  path: `/api/v2/logs?dd-api-key=${process.env.DD_KEY}&ddsource=${process.env.DD_SOURCE}&service=${process.env.MS}&env=${process.env.NODE_ENV}`,
-  ssl: true
-};
 
 const logger = () => {
   const logger = createLogger({
@@ -30,11 +26,10 @@ const logger = () => {
           myFormat
         ),
       }),
-      new transports.Http(httpTransportOptions),
-    ]
-  })
+    ],
+  });
 
-  return logger
-}
+  return logger;
+};
 
-module.exports = logger()
+module.exports = logger();
